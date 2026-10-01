@@ -14,10 +14,10 @@ import anything → the same object model → inspect / transform / export / enc
 ```
 
 
-[![Build (3 OS)](https://github.com/shuvrajeetkamila /<YOUR_REPO>/actions/workflows/build.yml/badge.svg)](https://github.com/<YOUR_GH_USERNAME>/<YOUR_REPO>/actions/workflows/build.yml)
+[![Build (3 OS)](https://github.com/shuvrajeetkamila /(https://github.com/shuvrajeetkamila/superfile-protocol-encrypt-decrypt)/actions/workflows/build.yml/badge.svg)](https://github.com/<YOUR_GH_USERNAME>/(https://github.com/shuvrajeetkamila/superfile-protocol-encrypt-decrypt)/actions/workflows/build.yml)
 [![License: MIT OR Apache-2.0](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue.svg)](#license)
 
-> **Placeholders to fill in:** the badge URLs above use `shuvrajeetkamila/<YOUR_REPO>`; the
+> **Placeholders to fill in:** the badge URLs above use `shuvrajeetkamila/(https://github.com/shuvrajeetkamila/superfile-protocol-encrypt-decrypt)`; the
 > download links in the next section do too. They are the only unfilled values in this file.
 
 ---
@@ -29,7 +29,7 @@ The ready-to-run Windows build lives in this repository **and** on the Releases 
 | | |
 |---|---|
 | In this repo | [`release/Superfile.exe`](release/Superfile.exe) |
-| Releases page | `https://github.com/shuvrajeetkamila/<YOUR_REPO>/releases` |
+| Releases page | `https://github.com/shuvrajeetkamila/(https://github.com/shuvrajeetkamila/superfile-protocol-encrypt-decrypt)/releases` |
 | Platform | Windows 10/11, 64-bit (x86-64). Single file, no installer, no runtime, no dependencies. |
 | Size | **21,347,608 bytes** (21.35 MB / 20.36 MiB) |
 | SHA-256 | `f8d5a8317ff765c1b53c18dfa46d2ddbd48a59e9897212f7f4456f16e4453af5` |
@@ -52,7 +52,7 @@ Requires CPython 3.13 (what CI and the release build use) and a browser. The UI 
 HTML/CSS/JS served by the app itself — there is no build step, no bundler and no framework.
 
 ```bash
-git clone https://github.com/<YOUR_GH_USERNAME>/<YOUR_REPO>.git
+git clone https://github.com/shuvrajeetkamila/(https://github.com/shuvrajeetkamila/superfile-protocol-encrypt-decrypt).git
 cd <YOUR_REPO>
 
 pip install pillow cryptography          # image codecs + AES-256-GCM
