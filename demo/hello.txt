@@ -1,0 +1,4 @@
+Hello from SUPERFILE!
+
+This is a plain text sample.
+It demonstrates TEXT import, editing and export.

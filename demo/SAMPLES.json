@@ -1,0 +1,156 @@
+{
+  "samples": [
+    {
+      "name": "Main.java",
+      "note": "Java source"
+    },
+    {
+      "name": "Program.cs",
+      "note": "C# source"
+    },
+    {
+      "name": "anim.gif",
+      "note": "GIF animation, 4 frames (pure LZW codec)"
+    },
+    {
+      "name": "app.js",
+      "note": "JavaScript source"
+    },
+    {
+      "name": "archive.tar.gz",
+      "note": "TAR.GZ with source + text"
+    },
+    {
+      "name": "blob.bin",
+      "note": "unknown binary blob (hex + entropy inspection)"
+    },
+    {
+      "name": "book.epub",
+      "note": "EPUB package (real zip)"
+    },
+    {
+      "name": "bundle.zip",
+      "note": "ZIP with nested txt + png + obj"
+    },
+    {
+      "name": "clip.mkv",
+      "note": "Matroska SKELETON (synthetic \u2014 EBML inspection demo)"
+    },
+    {
+      "name": "config.toml",
+      "note": "TOML (subset)"
+    },
+    {
+      "name": "config.yaml",
+      "note": "YAML (subset)"
+    },
+    {
+      "name": "data.json",
+      "note": "JSON data"
+    },
+    {
+      "name": "data.sqlite",
+      "note": "SQLite database (3 tables)"
+    },
+    {
+      "name": "demo.wasm",
+      "note": "WebAssembly module (real empty module + name section)"
+    },
+    {
+      "name": "doc.docx",
+      "note": "Word OOXML package (real zip)"
+    },
+    {
+      "name": "hello.py",
+      "note": "Python source"
+    },
+    {
+      "name": "hello.txt",
+      "note": "plain text"
+    },
+    {
+      "name": "icon.bmp",
+      "note": "BMP 24-bit"
+    },
+    {
+      "name": "letter.pdf",
+      "note": "PDF (one page, text extractable)"
+    },
+    {
+      "name": "lib.rs",
+      "note": "Rust source"
+    },
+    {
+      "name": "logo.svg",
+      "note": "SVG vector image"
+    },
+    {
+      "name": "main.c",
+      "note": "C source"
+    },
+    {
+      "name": "main.go",
+      "note": "Go source"
+    },
+    {
+      "name": "mesh.obj",
+      "note": "Wavefront OBJ cube"
+    },
+    {
+      "name": "movie.mp4",
+      "note": "MP4 container SKELETON (synthetic \u2014 structural inspection demo)"
+    },
+    {
+      "name": "notes.rtf",
+      "note": "RTF document"
+    },
+    {
+      "name": "page.html",
+      "note": "HTML document"
+    },
+    {
+      "name": "part.stl",
+      "note": "binary STL cube (12 triangles)"
+    },
+    {
+      "name": "photo.jpg",
+      "note": "JPEG image (Pillow-generated or tiny sample)"
+    },
+    {
+      "name": "pixel.png",
+      "note": "PNG 64\u00d764 gradient (pure codec)"
+    },
+    {
+      "name": "project.sfp",
+      "note": "SUPERFILE container \u2014 nested object graph with preserved originals"
+    },
+    {
+      "name": "readme.md",
+      "note": "markdown"
+    },
+    {
+      "name": "sample.elf",
+      "note": "SYNTHETIC ELF64 headers \u2014 static inspection demo (not a runnable program)"
+    },
+    {
+      "name": "sample.exe",
+      "note": "SYNTHETIC PE headers \u2014 static inspection demo (not a runnable program)"
+    },
+    {
+      "name": "scene.glb",
+      "note": "glTF binary \u2014 one triangle"
+    },
+    {
+      "name": "style.css",
+      "note": "CSS source"
+    },
+    {
+      "name": "table.csv",
+      "note": "CSV table"
+    },
+    {
+      "name": "tone.wav",
+      "note": "WAV PCM sine tone (real audio)"
+    }
+  ]
+}

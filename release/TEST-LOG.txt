@@ -1,0 +1,144 @@
+SUPERFILE - PACKAGED-BINARY TEST LOG
+==========================================================================
+artifact   : release/Superfile.exe
+exact size : 21347608 bytes (20.36 MiB = 21.35 MB)
+sha256     : f8d5a8317ff765c1b53c18dfa46d2ddbd48a59e9897212f7f4456f16e4453af5
+built from : the source tree in this repository (desktop.spec, PyInstaller 6.22.3)
+runner     : Wine 10.0 (Debian) on Linux x86_64 — NOT genuine Windows hardware
+generated  : 2026-10-01 15:19 UTC
+pe         : PE32+ x86-64 console, 7 sections, entry 0x0000DCF0
+command    : xvfb-run -a wine 'C:\Py313\python.exe' tests/packaged_e2e.py release/Superfile.exe --report ...
+summary    : ALL CHECKS PASS   (battery exit code 0)
+             source suite run inside the battery: 83 tests, 0 failures, 0 errors, 3 skipped (PASS)
+             packaged --self-test (12 points): PASS
+             section-8 encryption checks: 37 passed / 0 failed of 37 (same run, same exe)
+==========================================================================
+
+==========================================================================
+SUPERFILE PACKAGED-BINARY RELEASE TESTS (STAGE 3)
+==========================================================================
+-- source test suite (python -m tests.test_all, this interpreter) ---
+    source test suite                  PASS   83 run, 0 failures, 0 errors, 3 skipped, exit=0
+
+clean directory : C:\users\user\AppData\Local\Temp\superfile_clean_gr13_u0s
+binary          : Z:\home\user\release\Superfile.exe
+clean-dir copy  : C:\users\user\AppData\Local\Temp\superfile_clean_gr13_u0s\Superfile.exe  (ONLY this file was copied)
+
+-- §10 packaged --self-test --------------------------------------
+    self-test exit code                PASS   exit=0
+    adapter-load warnings              PASS   patterns found: NONE
+
+-- §22 clean-directory execution ---------------------------------
+    server startup (clean dir)         PASS   127.0.0.1:35741
+
+-- §8/§9 registry + UI resources ---------------------------------
+    registry counts                    PASS   adapters=28 formats=59 transforms=20
+    UI resources (html/js/css)         PASS   html=9826B js=68275B css=22214B
+
+-- §12 FORMAT MATRIX (import + parse, real files) ----------------
+    FORMAT     detected   type         support          operation      result
+    ---------- ---------- ------------ ---------------- -------------- ------
+    TXT        txt        TEXT         FULL SUPPORT     import+parse   ok
+    MD         md         TEXT         FULL SUPPORT     import+parse   ok
+    JSON       json       TEXT         FULL SUPPORT     import+parse   ok
+    YAML       yaml       TEXT         PARTIAL SUPPORT  import+parse   ok
+    TOML       toml       TEXT         PARTIAL SUPPORT  import+parse   ok
+    PNG        png        IMAGE        FULL SUPPORT     import+parse   ok
+    JPEG       jpeg       IMAGE        PARTIAL SUPPORT  import+parse   ok
+    GIF        gif        ANIMATION    FULL SUPPORT     import+parse   ok
+    BMP        bmp        IMAGE        FULL SUPPORT     import+parse   ok
+    SVG        svg        IMAGE        PARTIAL SUPPORT  import+parse   ok
+    PDF        pdf        DOCUMENT     PARTIAL SUPPORT  import+parse   ok
+    DOCX       docx       DOCUMENT     PARTIAL SUPPORT  import+parse   ok
+    WAV        wav        AUDIO        FULL SUPPORT     import+parse   ok
+    MP4        mp4        VIDEO        INSPECTION ONLY  import+parse   ok
+    MKV        mkv        VIDEO        INSPECTION ONLY  import+parse   ok
+    OBJ        obj        3D           PARTIAL SUPPORT  import+parse   ok
+    STL        stl        3D           PARTIAL SUPPORT  import+parse   ok
+    GLB        glb        3D           PARTIAL SUPPORT  import+parse   ok
+    ZIP        zip        ARCHIVE      FULL SUPPORT     import+parse   ok
+    TAR.GZ     gzip       ARCHIVE      PARTIAL SUPPORT  import+parse   ok
+    EXE        pe         EXECUTABLE   INSPECTION ONLY  import+parse   ok
+    ELF        elf        EXECUTABLE   INSPECTION ONLY  import+parse   ok
+    WASM       wasm       EXECUTABLE   INSPECTION ONLY  import+parse   ok
+    Python     python     SOURCE_CODE  FULL SUPPORT     import+parse   ok
+    C          c          SOURCE_CODE  FULL SUPPORT     import+parse   ok
+    JavaScript javascript SOURCE_CODE  FULL SUPPORT     import+parse   ok
+    Java       java       SOURCE_CODE  FULL SUPPORT     import+parse   ok
+    Rust       rust       SOURCE_CODE  FULL SUPPORT     import+parse   ok
+    Go         go         SOURCE_CODE  FULL SUPPORT     import+parse   ok
+    C#         csharp     SOURCE_CODE  FULL SUPPORT     import+parse   ok
+    CSS        css        SOURCE_CODE  FULL SUPPORT     import+parse   ok
+    SQLite     sqlite     DATABASE     PARTIAL SUPPORT  import+parse   ok
+    SFP        sfp        PROTOCOL     FULL SUPPORT     import+parse   ok
+    C++        cpp        SOURCE_CODE  FULL SUPPORT     import+parse   ok
+    format matrix (34 files)           PASS   34/34 imports passed
+
+-- §13 END-TO-END (detect -> object -> transform -> export -> re-import)
+    E2E PNG resize->export->re-import  PASS   detected=png 32x24
+    E2E JSON->YAML->JSON (canonical)   PASS   roundtrip-detected=yaml equal=True
+    E2E TXT edit/export (original preserved) PASS   orig-sha256 kept=7b470f9ce73e... html=139B detected=html
+    E2E ZIP extract_all -> children    PASS   children=['obj', 'png', 'txt']
+    E2E EXE static inspection (as data) PASS   structure keys=['entry_point', 'exports', 'image_base', 'imports', 'machine', 'sections']
+
+-- §14 EXECUTABLE SAFETY (imported as DATA — never executed) -----
+    sample.exe inspected as data       PASS   detected=pe support=INSPECTION ONLY
+    sample.elf inspected as data       PASS   detected=elf support=INSPECTION ONLY
+    demo.wasm inspected as data        PASS   detected=wasm support=INSPECTION ONLY
+
+-- §15 ARCHIVE SECURITY -----------------------------------------
+    A. safe ZIP accepted               PASS   detected=zip
+    B. ../../evil.txt traversal prevented PASS   kept=['good.txt']
+    C. decompression bomb rejected     PASS   20MB-zero zip import refused
+
+-- §16 SFP PROTOCOL ROUND-TRIP ----------------------------------
+    SFP round-trip: source->sfp->object->png PASS   original format restored=png byte-for-byte=True hist=3 steps sha256=9e0438c8724003ae...
+    SFP nested graph (children + entries) PASS   original format restored=zip children 3->3, entries=3->3, checksum-field=True
+    automatic executable execution     PASS   NOT PERFORMED (by design — binaries are data only)
+
+-- shutdown -----------------------------------------------------
+    server stopped                     PASS   process exited (returncode=1; in-app graceful shutdown proven at self-test step 12)
+    clean-directory execution          PASS   all checks ran with only Superfile.exe present
+
+==================================================
+SUPERFILE RELEASE CANDIDATE VERIFICATION
+==================================================
+
+Build OS:            Windows (10) [runner: E2B]
+Architecture:        AMD64
+Python:              3.13.1
+PyInstaller:         6.22.3
+Environment note:    fresh rebuild sha256 f8d5a831...; Python 3.13.1 win_amd64 + PyInstaller 6.22.3; cryptography 50.0.2 + argon2-cffi 25.1.0; wine 10.0 on Linux
+
+Windows EXE:         PASS
+Path:                Z:\home\user\release\Superfile.exe
+Exact size:          21347608 bytes
+                     21347.6 KB
+                     21.35 MB
+                     20.36 MiB
+Under 120 MB:        PASS (21347608 < 125829120)
+PE verification:     PASS (PE32+=True arch=x86-64 machine=0x8664 subsystem=CONSOLE entry=0x0000DCF0 version-resource=True)
+
+Source tests:        80 passed  0 failed  0 errors  3 skipped  (83 run; python -m tests.test_all executed by this harness with Python 3.13.1)
+Packaged self-test:  PASS
+Adapter loading:     adapters = 28
+                     formats = 59
+                     transforms = 20
+                     warnings = 0
+
+UI startup:          PASS
+PNG import:          PASS (pixel.png verified within format matrix)
+JSON import:         PASS (data.json verified within format matrix)
+TXT edit/export:     PASS
+ZIP extraction:      PASS
+ZIP traversal protection: PASS
+Decompression protection: PASS
+EXE static inspection:    PASS
+Automatic executable execution: NOT PERFORMED (binaries imported as data only)
+SFP round-trip:      PASS
+Clean-directory execution: PASS
+
+GitHub Actions Windows build:  READY (workflow present with windows-latest + self-test gate; not yet executed on GitHub)
+
+OVERALL:             ALL CHECKS PASS
+==================================================

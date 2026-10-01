@@ -1,0 +1,28 @@
+{
+  "app": "SUPERFILE",
+  "version": "1.0",
+  "capabilities": [
+    "open",
+    "create",
+    "edit",
+    "inspect",
+    "transform",
+    "export"
+  ],
+  "nested": {
+    "lossless": true,
+    "kinds": [
+      "LOSSLESS",
+      "LOSSY",
+      "STRUCTURAL"
+    ]
+  },
+  "numbers": [
+    1,
+    2,
+    3,
+    5,
+    8,
+    13
+  ]
+}

@@ -1,0 +1,42 @@
+==================================================
+SUPERFILE RELEASE CANDIDATE VERIFICATION
+==================================================
+
+Build OS:            Windows (10) [runner: E2B]
+Architecture:        AMD64
+Python:              3.13.1
+PyInstaller:         6.22.3
+Environment note:    fresh rebuild sha256 f8d5a831...; Python 3.13.1 win_amd64 + PyInstaller 6.22.3; cryptography 50.0.2 + argon2-cffi 25.1.0; wine 10.0 on Linux
+
+Windows EXE:         PASS
+Path:                Z:\home\user\release\Superfile.exe
+Exact size:          21347608 bytes
+                     21347.6 KB
+                     21.35 MB
+                     20.36 MiB
+Under 120 MB:        PASS (21347608 < 125829120)
+PE verification:     PASS (PE32+=True arch=x86-64 machine=0x8664 subsystem=CONSOLE entry=0x0000DCF0 version-resource=True)
+
+Source tests:        80 passed  0 failed  0 errors  3 skipped  (83 run; python -m tests.test_all executed by this harness with Python 3.13.1)
+Packaged self-test:  PASS
+Adapter loading:     adapters = 28
+                     formats = 59
+                     transforms = 20
+                     warnings = 0
+
+UI startup:          PASS
+PNG import:          PASS (pixel.png verified within format matrix)
+JSON import:         PASS (data.json verified within format matrix)
+TXT edit/export:     PASS
+ZIP extraction:      PASS
+ZIP traversal protection: PASS
+Decompression protection: PASS
+EXE static inspection:    PASS
+Automatic executable execution: NOT PERFORMED (binaries imported as data only)
+SFP round-trip:      PASS
+Clean-directory execution: PASS
+
+GitHub Actions Windows build:  READY (workflow present with windows-latest + self-test gate; not yet executed on GitHub)
+
+OVERALL:             ALL CHECKS PASS
+==================================================

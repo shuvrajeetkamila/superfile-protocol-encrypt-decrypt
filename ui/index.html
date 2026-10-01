@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SUPERFILE — Universal Digital Object Protocol</title>
+<script>
+/* Restore the collapsed-panel layout BEFORE the body is parsed, so the first paint can never show the
+   expanded layout for a moment.  Same keys as the "layout toggles" block at the end of app.js. */
+(function () {
+  try {
+    var ls = window.localStorage, root = document.documentElement;
+    if (ls.getItem("sf_top_collapsed") === "1") root.classList.add("sf-top-collapsed");
+    if (ls.getItem("sf_sidebar_collapsed") === "1") root.classList.add("sf-side-collapsed");
+    if (ls.getItem("sf_objheader_collapsed") === "1") root.classList.add("sf-oh-collapsed");
+  } catch (e) { /* storage unavailable: start expanded */ }
+})();
+</script>
+<link rel="stylesheet" href="/static/app.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230d1420'/%3E%3Cpath d='M8 22V10l8 6 8-6v12' stroke='%2338bdf8' stroke-width='2.5' fill='none' stroke-linejoin='round'/%3E%3C/svg%3E">
+</head>
+<body>
+<div id="app">
+
+  <!-- ══════════ TOP-CHROME TOGGLE — collapses #titlebar + #toolbar together (thin strip stays) ══════════ -->
+  <button id="sf-top-toggle" class="sf-edge-toggle" type="button"
+          aria-controls="titlebar toolbar" aria-expanded="true"
+          aria-label="Collapse top bar (title bar + toolbar)" title="Collapse top bar (title bar + toolbar)">
+    <span class="sf-arrow" aria-hidden="true">▲</span>
+  </button>
+
+  <!-- ══════════ TITLE BAR ══════════ -->
+  <header id="titlebar">
+    <div class="brand">
+      <svg class="logo" viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="#0d1420"/><path d="M8 22V10l8 6 8-6v12" stroke="#38bdf8" stroke-width="2.5" fill="none" stroke-linejoin="round"/></svg>
+      <div class="brand-text">
+        <h1>SUPERFILE</h1>
+        <p>One application. One object model. Many formats.</p>
+      </div>
+    </div>
+    <div class="title-meta">
+      <span class="pill pill-protocol">SUPERFILE PROTOCOL v1.0</span>
+      <span class="pill" id="pill-offline" title="Runs entirely on this machine">OFFLINE-FIRST</span>
+    </div>
+  </header>
+
+  <!-- ══════════ TOOLBAR ══════════ -->
+  <nav id="toolbar">
+    <button id="btn-open" class="tool accent" title="Open a file from this computer">OPEN</button>
+    <button id="btn-import-path" class="tool" title="Import by filesystem path (server-side)">IMPORT&nbsp;PATH</button>
+    <div class="tool-wrap">
+      <button id="btn-create" class="tool" title="Create a new Universal Object">CREATE&nbsp;▾</button>
+      <div id="create-menu" class="menu hidden"></div>
+    </div>
+    <span class="tool-sep"></span>
+    <button id="btn-save-sfp" class="tool" title="Save the current object graph as .sfp">SAVE&nbsp;AS&nbsp;.SFP</button>
+    <button id="btn-export" class="tool" title="Export to a standard format">EXPORT</button>
+    <button id="btn-inspect" class="tool" title="Universal inspector">INSPECT</button>
+    <button id="btn-edit" class="tool" title="Edit where supported">EDIT</button>
+    <button id="btn-transform" class="tool" title="Transform the object">TRANSFORM</button>
+    <span class="tool-sep"></span>
+    <button id="btn-encrypt" class="tool" title="Encrypt this object into a locked .sfp (AES-256-GCM)">ENCRYPT</button>
+    <button id="btn-decrypt" class="tool" title="Unlock an encrypted .sfp (password, or this device)">DECRYPT</button>
+    <input type="file" id="file-input" class="hidden-input">
+  </nav>
+
+  <div id="main">
+    <!-- ══════════ SIDEBAR ══════════ -->
+    <aside id="sidebar">
+      <section class="side-block">
+        <h2>RECENT OBJECTS</h2>
+        <ul id="recent-list" class="side-list"><li class="muted">empty — open or create a file</li></ul>
+      </section>
+      <section class="side-block">
+        <h2>OBJECT GRAPH</h2>
+        <div id="object-tree" class="tree"><p class="muted">no object loaded</p></div>
+      </section>
+      <section class="side-block">
+        <h2>NAVIGATION</h2>
+        <ul class="side-list">
+          <li><a href="#" data-tab="registry">Supported Formats</a></li>
+          <li><a href="#" data-tab="explorer">Protocol Explorer</a></li>
+          <li><a href="#" data-tab="matrix">Conversion Matrix</a></li>
+          <li><a href="#" data-tab="demo">Demo / Samples</a></li>
+          <li><a href="#" data-tab="about">About &amp; Security</a></li>
+        </ul>
+      </section>
+      <section class="side-block">
+        <h2>SAFETY</h2>
+        <p class="safety-note">Imported files are untrusted data. Executables are <b>never</b> run — static inspection only.</p>
+      </section>
+    </aside>
+
+    <!-- ══════════ SIDEBAR TOGGLE — slim rail on #sidebar's right edge; stays visible when collapsed ══════════ -->
+    <button id="sf-side-toggle" class="sf-edge-toggle" type="button"
+            aria-controls="sidebar" aria-expanded="true"
+            aria-label="Collapse sidebar" title="Collapse sidebar">
+      <span class="sf-arrow" aria-hidden="true">◄</span>
+    </button>
+
+    <!-- ══════════ CONTENT ══════════ -->
+    <section id="content">
+      <div id="object-header" class="hidden">
+        <div class="oh-row">
+          <h2 id="oh-name">—</h2>
+          <span id="oh-support" class="badge">—</span>
+          <!-- ══ details slide toggle: the .oh-row above stays visible, only #sf-oh-details below slides ══ -->
+          <button id="sf-oh-toggle" type="button" aria-controls="sf-oh-details" aria-expanded="true"
+                  aria-label="Collapse file details" title="Collapse file details"><span class="sf-arrow" aria-hidden="true">▼</span></button>
+        </div>
+        <div id="sf-oh-details">
+        <div class="oh-grid">
+          <div><label>TYPE</label><span id="oh-type">—</span></div>
+          <div><label>DETECTED FORMAT</label><span id="oh-format">—</span></div>
+          <div><label>MIME</label><span id="oh-mime">—</span></div>
+          <div><label>SIZE</label><span id="oh-size">—</span></div>
+          <div class="span2"><label>SHA-256</label><span class="mono" id="oh-hash">—</span></div>
+          <div class="span3"><label>DETECTION</label><span id="oh-detect">—</span></div>
+        </div>
+        <div class="oh-caps">
+          <label>CAPABILITIES</label>
+          <div id="oh-caps"></div>
+        </div>
+        <div id="oh-warnings" class="warnings hidden"></div>
+        </div><!-- /#sf-oh-details — everything above this line slides open/closed -->
+      </div>
+
+      <nav id="tabs">
+        <button data-tab="view" class="tab active">VIEW</button>
+        <button data-tab="edit" class="tab">EDIT</button>
+        <button data-tab="inspect" class="tab">INSPECT</button>
+        <button data-tab="transform" class="tab">TRANSFORM</button>
+        <button data-tab="export" class="tab">EXPORT&nbsp;AS</button>
+        <button data-tab="history" class="tab">HISTORY</button>
+        <button data-tab="graph" class="tab">GRAPH</button>
+        <button data-tab="registry" class="tab">FORMATS</button>
+        <button data-tab="explorer" class="tab">PROTOCOL</button>
+        <button data-tab="matrix" class="tab">MATRIX</button>
+        <button data-tab="demo" class="tab">DEMO</button>
+        <button data-tab="about" class="tab">ABOUT</button>
+        <button data-tab="encrypt" class="tab">ENCRYPT</button>
+        <button data-tab="decrypt" class="tab">DECRYPT</button>
+      </nav>
+
+      <div id="tab-body">
+        <!-- home / welcome -->
+        <div id="tab-view" class="tab-pane active">
+          <div id="welcome">
+            <h2>SUPERFILE</h2>
+            <p class="tagline">"One application. One object model. Many formats."</p>
+            <p class="muted">Open, read, create, edit, inspect, transform, convert and export digital
+            objects — through one <b>UniversalObject</b> model and the <b>.sfp SUPERFILE</b> container,
+            while preserving original bytes and format identity.</p>
+            <div class="welcome-actions">
+              <button class="big-btn accent" id="w-open">OPEN A FILE</button>
+              <button class="big-btn" id="w-create">CREATE AN OBJECT</button>
+              <button class="big-btn" id="w-demo">RUN THE DEMO</button>
+            </div>
+            <div class="pipeline-hint">
+              FILE → DETECTION → ADAPTER → UNIVERSAL OBJECT → GRAPH → TRANSFORM → EXPORT → FILE
+            </div>
+          </div>
+        </div>
+        <div id="tab-edit" class="tab-pane"></div>
+        <div id="tab-inspect" class="tab-pane"></div>
+        <div id="tab-transform" class="tab-pane"></div>
+        <div id="tab-export" class="tab-pane"></div>
+        <div id="tab-history" class="tab-pane"></div>
+        <div id="tab-graph" class="tab-pane"></div>
+        <div id="tab-registry" class="tab-pane"></div>
+        <div id="tab-explorer" class="tab-pane"></div>
+        <div id="tab-matrix" class="tab-pane"></div>
+        <div id="tab-demo" class="tab-pane"></div>
+        <div id="tab-about" class="tab-pane"></div>
+        <div id="tab-encrypt" class="tab-pane"></div>
+        <div id="tab-decrypt" class="tab-pane"></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ══════════ STATUS BAR ══════════ -->
+  <footer id="statusbar">
+    <span id="status">ready</span>
+    <span id="status-right" class="muted"></span>
+  </footer>
+</div>
+<script src="/static/app.js"></script>
+</body>
+</html>

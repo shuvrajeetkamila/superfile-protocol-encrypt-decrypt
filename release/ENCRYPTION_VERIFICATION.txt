@@ -1,0 +1,158 @@
+SUPERFILE - ENCRYPT / DECRYPT VERIFICATION (AES-256-GCM)
+==========================================================================
+artifact   : release/Superfile.exe
+exact size : 21347608 bytes (20.36 MiB = 21.35 MB)
+sha256     : f8d5a8317ff765c1b53c18dfa46d2ddbd48a59e9897212f7f4456f16e4453af5
+built from : the source tree in this repository (desktop.spec, PyInstaller 6.22.3)
+runner     : Wine 10.0 (Debian) on Linux x86_64 — NOT genuine Windows hardware
+generated  : 2026-10-01 15:19 UTC
+device lock : real Windows DPAPI (CryptProtectData/CryptUnprotectData via ctypes) as provided by
+              wine's crypt32; the stored master key is a DPAPI-protected blob, never a raw key
+command     : xvfb-run -a wine 'C:\Py313\python.exe' tests/encryption_verify.py release/Superfile.exe \
+                --report 'Z:\home\user\.verify\enc_verify_exe.txt'
+result      : 37 passed, 0 failed, 37 checks (exit 0)
+--------------------------------------------------------------------------
+
+======================================================================
+SUPERFILE — ENCRYPT / DECRYPT VERIFICATION (AES-256-GCM)
+======================================================================
+target      : release/Superfile.exe
+platform    : win32  python 3.13.1
+device_lock : True    password KDFs: ['pbkdf2-sha256', 'argon2id']
+environment : fresh rebuild sha256 f8d5a831...; wine 10.0 on Linux
+
+imported    : secret-notes.txt (327 B) -> b29536bc-bba3-47eb-82fc-7c5e0e54a92e
+              secret-picture.png (115 B) -> 8fec4bb7-29c9-4144-9ec5-1c82725dd543
+
+1. encrypt a text object (password mode, default PBKDF2)
+  PASS  encrypt endpoint answered 200 with .sfp bytes   [HTTP 200, 2874 bytes, magic 8b5346500d0a1a0a]
+   served as: attachment; filename="secret-notes.encrypted.sfp"
+   hexdump of the ENCRYPTED container (head/tail):
+     00000000  8b 53 46 50 0d 0a 1a 0a 00 01 00 00 00 00 00 20  |.SFP........... |
+     00000010  00 00 00 03 00 00 00 00 00 00 00 00 00 00 00 00  |................|
+     00000020  45 4e 43 52 00 00 00 00 00 00 00 f1 7b 22 76 22  |ENCR........{"v"|
+     00000030  3a 20 31 2c 20 22 6e 6f 6e 63 65 22 3a 20 22 43  |: 1, "nonce": "C|
+     00000040  46 65 47 5a 38 52 42 6f 62 36 59 72 2b 61 5a 22  |FeGZ8RBob6Yr+aZ"|
+     00000050  2c 20 22 73 61 6c 74 22 3a 20 22 57 6b 71 74 45  |, "salt": "WkqtE|
+     ...
+     00000b10  53 4d 00 00 00 00 00 00 00 20 a6 67 41 88 d0 4e  |SM....... .gA..N|
+     00000b20  f0 06 09 06 c9 b7 c5 cd 07 cb 97 dc a9 e7 c5 d2  |................|
+     00000b30  59 6d 1b 7f d3 02 f5 74 72 60                    |Ym.....tr`|
+  PASS  ENCR chunk present (plaintext framing: mode/kdf/salt/nonce)   [ENCR at offset 32]
+   ENCR: mode=password kdf=pbkdf2-sha256 params={'iterations': 600000, 'hash': 'sha256'}
+  PASS  the marker text does NOT appear anywhere in the encrypted file   [searched 2874 bytes for 'TASK-C-PLAINTEXT-MARKER-1f84ab77']
+  PASS  the decoded body text does NOT appear either
+  PASS  the original file name does NOT appear
+  PASS  container is checksummed AFTER encryption (CKSM last chunk)   [CKSM at 2830]
+  PASS  a PNG object encrypts too (CONT metadata + BLOB decoded frames)   [HTTP 200, 2548 bytes, filename absent: True]
+  PASS  no raw RGBA/IDAT payload from the PNG object is readable in its encrypted file
+
+2. the NORMAL open path must refuse an encrypted file with a clear message
+  PASS  importing an encrypted .sfp is refused with the documented message   [HTTP 400: 'this .sfp is encrypted — use the DECRYPT tab to unlock it first']
+
+3. decrypt: wrong password, then the right one
+  PASS  wrong password -> specific error, no partial success   [HTTP 400: 'wrong password — AES-256-GCM could not authenticate this file (or the file is damaged)']
+  PASS  correct password -> {ok:true, filename:'...-decrypted.sfp'}   [HTTP 200: {"ok": true, "filename": "secret-notes-decrypted.sfp", "object_id": "b29536bc-bba3-47eb-82fc-7c5e0e54a92e", "size": 2509, "encrypted_size": 2874, "original_file]
+  PASS  the decrypted object's decoded text is intact   [6 body lines, starts with the marker]
+  PASS  the decrypted object's ORIGINAL BYTES are byte-identical to the source file   [327 bytes, sha256 183f5086bc75f461]
+
+4. password KDFs
+   advertised by the server: ['pbkdf2-sha256', 'argon2id']
+  PASS  argon2id requested -> ENCR records argon2id + its cost parameters   [kdf=argon2id params={'time_cost': 3, 'memory_cost': 65536, 'parallelism': 4, 'hash': 'sha256', 'kind': 'id'}]
+  PASS  an argon2id-protected file decrypts   [HTTP 200]
+  PASS  PBKDF2 files (the default the UI writes) still decrypt   [HTTP 200]
+  PASS  a non-encrypted .sfp is refused by DECRYPT, not mis-read   [not a SUPERFILE container]
+
+5. tampering must be detected
+  PASS  a single flipped byte -> refused (checksum/GCM), no crash   [HTTP 400: checksum mismatch — container is corrupt or was modified]
+  PASS  the splice test really moves a non-empty payload chunk   [128 bytes of ciphertext swapped, different content: True]
+  PASS  a chunk spliced in from another encryption is rejected by GCM itself (checksum rebuilt)   [HTTP 400: wrong password — AES-256-GCM could not authenticate this file (or the file is damaged)]
+
+6. device mode (Windows DPAPI)
+   this machine's own keyring (must stay untouched): C:\users\user\AppData\Local\Superfile\device-key.json -> absent
+  PASS  device mode encrypts (no password) and records the device reference   [device_ref=9e74e493-a55d-48ab-b201-485204f89cc1 kdf=hkdf-sha256]
+  PASS  the device-locked file also hides the plaintext
+  PASS  the SAME machine unlocks it with no password   [HTTP 200: {"ok": true, "filename": "secret-notes-decrypted.sfp", "object_id": "b29536bc-bba3-47eb-82fc-7c5e0e54a92e", "size": 2558]
+   device keyring: C:\users\user\AppData\Local\Temp\sfenc_local_9yk6am7d\Superfile\device-key.json
+  PASS  a machine WITHOUT the keyring gets the exact documented message   [HTTP 400: 'This file was locked to a different device, or needs a password.']
+  PASS  with the keyring restored the same machine unlocks it again   [HTTP 200]
+  PASS  the device-locked run did NOT poison this machine's own keyring (it ran with an isolated, temporary keyring)   [absent -> absent]
+
+6b. /api/decrypt refuses malformed requests with a plain 400 (never a bare 500)
+  PASS  no file part -> documented 400   [HTTP 400: 'no file part in the request']
+  PASS  empty upload -> documented 400   [HTTP 400: 'the uploaded file is empty']
+  PASS  non-multipart body -> documented 400   [HTTP 400: 'expected multipart/form-data with the .sfp file']
+  PASS  garbage bytes -> documented 400, never a 5xx   [HTTP 400: 'not a SUPERFILE container']
+
+7. regression: everything that existed before still works
+   EXPORT secret-notes.txt  -> txt   HTTP 200  secret-notes.txt                             327 B
+   EXPORT secret-notes.txt  -> md    HTTP 200  secret-notes.md                              356 B
+   EXPORT secret-notes.txt  -> html  HTTP 200  secret-notes.html                            445 B
+   EXPORT secret-notes.txt  -> json  HTTP 400  text adapter cannot export 'json'            0 B
+   EXPORT secret-notes.txt  -> csv   HTTP 400  text adapter cannot export 'csv'             0 B
+   EXPORT secret-notes.txt  -> yaml  HTTP 400  text adapter cannot export 'yaml'            0 B
+   EXPORT secret-notes.txt  -> xml   HTTP 400  text adapter cannot export 'xml'             0 B
+   EXPORT secret-notes.txt  -> sfp   HTTP 200  secret-notes.sfp                             3212 B
+   EXPORT data.json         -> txt   HTTP 200  data.txt                                     328 B
+   EXPORT data.json         -> md    HTTP 400  json adapter cannot export 'md'              0 B
+   EXPORT data.json         -> html  HTTP 400  json adapter cannot export 'html'            0 B
+   EXPORT data.json         -> json  HTTP 200  data.json                                    328 B
+   EXPORT data.json         -> csv   HTTP 400  CSV export needs a JSON array of objects     0 B
+   EXPORT data.json         -> yaml  HTTP 200  data.yaml                                    234 B
+   EXPORT data.json         -> xml   HTTP 400  json adapter cannot export 'xml'             0 B
+   EXPORT data.json         -> sfp   HTTP 200  data.sfp                                     3317 B
+  PASS  every EXPORT attempt is either real bytes or a specific refusal (no 5xx, no empty success)
+  PASS  EXPORT still produces the source format of each object   [txt object -> ['txt', 'md', 'html', 'sfp'] | json object -> ['txt', 'json', 'yaml', 'sfp']]
+  PASS  EXPORT .sfp still works from both
+  PASS  SAVE AS .SFP still writes the plain container   [3212 bytes, magic 8b5346500d0a1a0a]
+  PASS  SFP round-trip still preserves the original bytes byte-for-byte   [327 bytes identical: True]
+  PASS  the adapter registry is unchanged (no adapter lost)   [adapters 28, formats 59, transforms 20]
+  PASS  an encrypted file is NOT mistaken for a normal object anywhere
+
+======================================================================
+RESULT: 37 passed, 0 failed, 37 checks
+======================================================================
+
+==========================================================================
+SAME SCRIPT, SOURCE TREE (linux python) - device mode correctly reported unavailable
+==========================================================================
+  result : 33 passed, 0 failed, 33 checks (exit 0)
+
+     advertised by the server: ['pbkdf2-sha256', 'argon2id']
+    PASS  a non-encrypted .sfp is refused by DECRYPT, not mis-read   [not a SUPERFILE container]
+    PASS  device mode is refused with the documented note, not faked   [HTTP 400: 'device-lock mode is Windows-only in this build (this is linux) — use a password instead']
+    PASS  device-mode DECRYPT on this platform reports the same limitation   [HTTP 400: 'This file was locked to a different device, or needs a password.']
+    PASS  no file part -> documented 400   [HTTP 400: 'no file part in the request']
+    PASS  empty upload -> documented 400   [HTTP 400: 'the uploaded file is empty']
+    PASS  non-multipart body -> documented 400   [HTTP 400: 'expected multipart/form-data with the .sfp file']
+    PASS  garbage bytes -> documented 400, never a 5xx   [HTTP 400: 'not a SUPERFILE container']
+     EXPORT secret-notes.txt  -> txt   HTTP 200  secret-notes.txt                             327 B
+     EXPORT secret-notes.txt  -> md    HTTP 200  secret-notes.md                              356 B
+     EXPORT secret-notes.txt  -> html  HTTP 200  secret-notes.html                            445 B
+     EXPORT secret-notes.txt  -> json  HTTP 400  text adapter cannot export 'json'            0 B
+     EXPORT secret-notes.txt  -> csv   HTTP 400  text adapter cannot export 'csv'             0 B
+     EXPORT secret-notes.txt  -> yaml  HTTP 400  text adapter cannot export 'yaml'            0 B
+     EXPORT secret-notes.txt  -> xml   HTTP 400  text adapter cannot export 'xml'             0 B
+     EXPORT secret-notes.txt  -> sfp   HTTP 200  secret-notes.sfp                             3212 B
+     EXPORT data.json         -> txt   HTTP 200  data.txt                                     328 B
+     EXPORT data.json         -> md    HTTP 400  json adapter cannot export 'md'              0 B
+     EXPORT data.json         -> html  HTTP 400  json adapter cannot export 'html'            0 B
+     EXPORT data.json         -> json  HTTP 200  data.json                                    328 B
+     EXPORT data.json         -> csv   HTTP 400  CSV export needs a JSON array of objects     0 B
+     EXPORT data.json         -> yaml  HTTP 200  data.yaml                                    234 B
+     EXPORT data.json         -> xml   HTTP 400  json adapter cannot export 'xml'             0 B
+     EXPORT data.json         -> sfp   HTTP 200  data.sfp                                     3316 B
+  RESULT: 33 passed, 0 failed, 33 checks
+
+==========================================================================
+OPTIONAL KDF (argon2id) - SIZE AND DEGRADATION, measured on this machine
+==========================================================================
+  with argon2-cffi    : 21347608 bytes (the shipped exe)
+  without argon2-cffi : 21306232 bytes (measurement-only build, argon2 excluded on purpose)
+  delta               : 41376 bytes = 0.039 MiB -> kept
+  the without-build passes its own 12-point self-test (PASS)
+  and its own encryption run: 36 passed / 0 failed of 36 checks.  It advertises
+  ['pbkdf2-sha256'] only and reports Argon2id as unavailable instead of faking it:
+
+    advertised by the server: ['pbkdf2-sha256']
+    PASS  argon2id not advertised (argon2-cffi absent) - reported, not faked   [['pbkdf2-sha256']]

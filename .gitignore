@@ -1,0 +1,36 @@
+# ---------------------------------------------------------------- Python
+__pycache__/
+*.py[cod]
+*.pyc
+*.egg-info/
+.eggs/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ---------------------------------------------------------------- build output
+build/
+dist/
+# PyInstaller one-file builds also drop a per-spec copy of the .spec next to it.
+# desktop.spec is the REAL, committed spec - keep it, ignore generated copies.
+*.spec
+!desktop.spec
+
+# ---------------------------------------------------------------- virtualenvs
+.venv/
+venv/
+env/
+
+# ---------------------------------------------------------------- local Windows test builds (wine)
+.wine/
+
+# ---------------------------------------------------------------- editors / OS
+.DS_Store
+Thumbs.db
+*.swp
+
+# ---------------------------------------------------------------- local verification scratch
+.verify/
+
+# Nothing under release/, docs/, demo/, ui/, superfile/, tests/, plugins/,
+# examples/ or .github/ is ignored - the whole tree is meant to be committed.

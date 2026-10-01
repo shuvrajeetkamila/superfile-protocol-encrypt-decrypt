@@ -1,0 +1,11 @@
+# SUPERFILE YAML subset sample
+app: superfile
+version: "1.0"
+debug: false
+window:
+  width: 1280
+  height: 720
+formats:
+  - png
+  - jpeg
+  - gif

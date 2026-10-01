@@ -1,0 +1,9 @@
+# SUPERFILE TOML sample
+title = "SUPERFILE demo"
+version = "1.0"
+active = true
+tags = ["protocol", "universal"]
+
+[window]
+width = 1280
+height = 720

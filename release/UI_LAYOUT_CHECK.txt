@@ -1,0 +1,208 @@
+SUPERFILE - real-browser verification of the PACKAGED exe
+(layout toggles + file-details slide + the ENCRYPT/DECRYPT tabs)
+==========================================================================
+artifact   : release/Superfile.exe
+exact size : 21347608 bytes (20.36 MiB = 21.35 MB)
+sha256     : f8d5a8317ff765c1b53c18dfa46d2ddbd48a59e9897212f7f4456f16e4453af5
+built from : the source tree in this repository (desktop.spec, PyInstaller 6.22.3)
+runner     : Wine 10.0 (Debian) on Linux x86_64 — NOT genuine Windows hardware
+generated  : 2026-10-01 15:19 UTC
+browser    : headless Chromium (Debian trixie build), driven by Playwright, talking to the exe over 127.0.0.1
+commands   : xvfb-run -a python3 tests/ui_layout_check.py --spawn-exe release/Superfile.exe \
+               --shots shots_exe --wine-prefix <prefix> --browser /usr/bin/chromium --port 8831
+             xvfb-run -a python3 tests/ui_layout_check.py --spawn-source . \
+               --shots shots_src --browser /usr/bin/chromium --port 8832
+result     : exe 128 passed, 0 failed, 128 checks (exit 0);  source tree 120 passed, 0 failed, 120 checks (exit 0)
+scope note : this run used the live checks only.  The optional A/B additivity blocks (--baseline and
+             --orig-ui) need the click-through JSON and the pre-change ui/ files recorded from the
+             previous UI; those scratch artifacts lived outside the repository and were lost when the
+             build sandbox was recycled, so those two comparison blocks did not run this time.  What DID
+             run is listed below, including 'served X is byte-identical to the source file' for all three
+             UI files and the full click-through of every control in the current UI.
+             (the exe run has 8 more checks than the source run: device-lock mode exists only on Windows,
+              so the source run replaces those with the 'greyed out, never faked' assertions)
+--------------------------------------------------------------------------
+
+
+=== 1. click-through of every existing control (toggles untouched) ===
+  recorded 310 observations; console errors: 0
+  PASS  click-through raised zero console/page errors
+
+=== 2. same click-through AFTER 3 full collapse/expand cycles of both panels ===
+  PASS  after toggling, 310 observations still IDENTICAL to the untouched run apart from the documented additions   [0 unexpected differences]
+  PASS  zero console/page errors
+
+=== 2b. the UI the server really serves == the source files; original markup untouched ===
+  PASS  served index.html is byte-identical to the source file   [9826 bytes, sha256 74e33f56a90f2e79]
+  PASS  served app.js is byte-identical to the source file   [68275 bytes, sha256 c305babeadbebae2]
+  PASS  served app.css is byte-identical to the source file   [22214 bytes, sha256 ddf4042dd3188df4]
+
+=== 3a. load the real app, import a real PNG so every panel holds real data ===
+  browser: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36
+  viewport 1280x800  strip h=12  titlebar h=60.5  toolbar h=40  sidebar w=250  handle w=14
+  content 1016 x 660 at (264, 112.5)   statusbar h=27.5
+  PASS  top toggle is the very first thing in #app: y=0, thin strip   [y=0 h=12]
+  PASS  #titlebar sits directly under the strip
+  PASS  left toggle sits on #sidebar's right edge; #content starts right after it (no overlap)   [sidebar right edge=250 handle x=250]
+  PASS  #sidebar is still exactly 250px wide when expanded
+  PASS  10 toolbar .tool buttons (the original 8 + ENCRYPT/DECRYPT) and the same 5 sidebar data-tab links (the new buttons are not sidebar links)
+
+=== 3b. collapse TOP (#titlebar + #toolbar as one unit) ===
+  PASS  both #titlebar and #toolbar are collapsed together
+  PASS  #content grew by exactly titlebar+toolbar height   [660 -> 760.5 (+100.5, expected +100.5)]
+  PASS  nothing else moved: content width, sidebar width, status bar, strip unchanged
+  PASS  #main now starts right under the thin strip   [main.y=12]
+  PASS  aria-expanded=false, localStorage sf_top_collapsed=1, arrow flipped (up -> down)   [{'exp': 'false', 'ls': '1', 'arrow': 'matrix(-1, 0, 0, -1, 0, 0)'}]
+  PASS  collapse is a smooth animation, not a snap   [12 in-between frames, 201 ms, 660 -> 760.5 px, monotonic=True]
+  PASS  titlebar and toolbar animate in lock-step (one unit)   [titlebar 117-318 ms, toolbar 117-318 ms]
+  PASS  re-expanded TOP: every key rectangle is IDENTICAL to the original   [8 elements x (x,y,w,h) equal]
+  PASS  no leftover inline style / running animation on the bars after expanding
+  PASS  expand is animated too   [10 in-between frames, 167 ms]
+
+=== 3c. collapse LEFT SIDEBAR ===
+  PASS  #sidebar is width 0 (and out of the tab order / a11y tree)   [w=0 visibility=hidden]
+  PASS  #content absorbed exactly the freed 250px without any JS sizing (flex:1 verified)   [1016 -> 1266 (+250)]
+  PASS  slim rail with the re-open arrow stays at the left edge; content starts right after it   [rail x=0 w=14; content x=14]
+  PASS  heights unchanged (no cross-talk with the top bar)
+  PASS  aria-expanded=false, localStorage sf_sidebar_collapsed=1, animation flag cleaned up   [{'exp': 'false', 'ls': '1', 'cls': 'sf-anim sf-side-collapsed'}]
+  PASS  sidebar collapse is smooth   [12 in-between frames, 200 ms, 250 -> 0 px]
+  PASS  re-expanded SIDEBAR: every key rectangle is IDENTICAL to the original   [8 elements x (x,y,w,h) equal]
+  PASS  sidebar back at 250px and visible
+
+=== 3d. collapse BOTH ===
+  #content = 1266 x 760 px of a 1280x800 window = 98.9% of the width, 95.1% of the height; area x1.44 vs expanded
+  what is left outside #content: top strip 12px, left rail 14px, status bar 28px
+  PASS  #content fills the window except the thin strip, the slim rail and the (out-of-scope) status bar   [w=98.9% h=95.1%]
+  PASS  #content is larger in both axes
+
+=== 3d'. expand both again + extra rounds: nothing cleared or re-initialised ===
+  PASS  both re-expanded together: every key rectangle IDENTICAL to the original   [8 elements x (x,y,w,h) equal]
+  toggle clicks performed on this page: top x10, sidebar x10
+  PASS  all 23 marked DOM nodes (lists, tree, header, buttons, panes) are the SAME objects afterwards - none re-created   [23/23]
+  PASS  zero childList/text mutations inside #sidebar, #content, #titlebar, #toolbar during ALL toggling   [child=0 text=0]
+  PASS  innerHTML of #sidebar, #content, #titlebar, #toolbar is byte-identical before vs after   [sidebar=1272B, content=8205B, toolbar=1274B, titlebar=603B]
+  PASS  the loaded file's INSPECT data is intact   [602 chars, sha 59f0e3bbf336]
+  PASS  #object-header still shows the loaded object   [pixel.png]
+  PASS  RECENT OBJECTS list and OBJECT GRAPH tree still populated   [recent='pixel.png | png · 7.7 KB · FULL SUPPORT' tree='pixel.png [IMAGE]']
+
+=== 3e. persistence: reload, new tab, full browser+server restart ===
+  PASS  after page.reload() both panels are STILL collapsed, identical geometry   [sf-top-collapsed sf-side-collapsed sf-anim]
+  PASS  restored without playing an animation   [running animations right after load: 0]
+  PASS  collapsed state applied BEFORE the first paint (no flash of the expanded layout)   [class applied at 54.5 ms, first paint at 116.0 ms]
+  PASS  a brand-new tab on the same origin opens collapsed
+  PASS  after closing the browser AND restarting the server (same port) both panels are still collapsed   [origin http://127.0.0.1:8831/]
+  note: the server's object store is in-memory, so RECENT OBJECTS starts empty after a server restart (pre-existing behaviour, unrelated to the toggles)
+  PASS  expanded again after the restart: geometry identical to the very first measurement   [8 elements equal]
+  PASS  localStorage now says 0 / 0
+
+=== 3g. keyboard, rapid clicks, scroll position, narrow window, blocked storage ===
+  PASS  top toggle works from the keyboard (Enter collapses, Space expands)
+  PASS  double-click mid-animation ends cleanly expanded (no stuck half-state, no leftover styles)
+  PASS  three rapid clicks land on the correct (collapsed) state
+  PASS  three rapid sidebar clicks land on collapsed, flag cleaned up
+  PASS  sidebar scroll position survives collapse -> expand   [scrollTop 90 -> 90 (scrollHeight 459, clientHeight 240)]
+  PASS  wrapped toolbar (narrow window) is re-measured on expand: height follows the CURRENT width   [620px wide: toolbar 72px (wrapped); resized to 1280 while collapsed -> 40px]
+  PASS  after resize-while-collapsed + expand the layout equals the original 1280x800 layout
+  PASS  prefers-reduced-motion: both toggles snap instantly (0 in-between frames) and land on the correct state   [top 0 frames, sidebar 0 frames]
+  PASS  prefers-reduced-motion: expanding again restores the identical layout
+  PASS  top bar collapsed: the welcome screen's REAL 'OPEN A FILE' button still opens the file chooser (its <input> lives inside the hidden toolbar)
+  PASS  top bar collapsed: welcome 'RUN THE DEMO' still switches to the DEMO tab
+  PASS  top bar collapsed: sidebar NAVIGATION links still work
+  PASS  both collapsed: content tabs keep working
+  PASS  both collapsed: Tab / Shift+Tab skip the hidden toolbar buttons and sidebar links entirely (out of tab order)   [Shift+Tab from rail -> #sf-top-toggle; Tab from strip -> #sf-side-toggle]
+  PASS  an open CREATE menu is closed by the app's own outside-click rule when the toggle is used (no orphaned dropdown after re-expanding)   [open before=True, open after=False]
+  PASS  with localStorage BLOCKED (access throws) both toggles still work for the session and raise no page error   [errors=[]]
+  PASS  zero console errors / uncaught page errors during the whole session   [0 errors]
+
+=== 3h. #object-header details slide — no file loaded yet (existing behaviour) ===
+  PASS  no file loaded: #object-header is display:none through the existing "hidden" class (untouched)   [display=none class-hidden=True]
+  PASS  clicking the arrow with NO file loaded cannot reveal the block — the two states compose, "hidden" wins   [html class has sf-oh-collapsed=True, header display=none]
+
+=== 3h. open a file → details expanded by default, tabs anchored under the header ===
+  header 225px (row 24, details 178) | tabs y=337.5 h=33 | tab-body y=370.5 h=402 | content h=660
+  PASS  a loaded file shows the details fully expanded by default (grid + capabilities visible)   [aria=true details.h=178]
+  PASS  the .oh-row and the new arrow are visible on the header   [row.h=24 arrow=26x22]
+  PASS  #tabs is exactly on #object-header's bottom edge, #tab-body exactly under #tabs, and the three fill #content   [tabs.y=337.5 == header.bottom=337.5]
+
+=== 3h. collapse the details — smooth slide, tabs/body must not jump, resize or flicker ===
+  PASS  the details slide up over ~0.2 s instead of snapping   [11 in-between frames, 183 ms, 178 -> 0 px, monotonic=True]
+  PASS  #tab-body grew by exactly the height #object-header gave up (the freed space went nowhere else)   [body 402 -> 588 px, header 225 -> 39 px (details 178 -> 0 + 8 px of padding)]
+  PASS  #tabs followed the header's bottom edge smoothly (it is never pushed down or resized, only carried up with the block)   [tabs.y 337.5 -> 151.5 px over 20 frames]
+  PASS  #tabs never resized or flickered during the slide (constant height and width across every frame)   [height spread 0.00 px, width spread 0.00 px over 44 frames]
+  PASS  collapsed: the tab strip is still exactly anchored, same size, same x   [tabs 1016x33 @x=264]
+  PASS  the filename/badge row and the arrow stay visible — they are the anchor to re-open the details   [header 225 -> 39 px, row 24 px]
+  PASS  aria-expanded=false, localStorage sf_objheader_collapsed=1, arrow flipped down -> up   [arrow transform matrix(-1, 0, 0, -1, 0, 0)]
+  PASS  collapsed details are aria-hidden and max-height:0 — nothing left to read or tab into   [aria-hidden=true, max-height=0px]
+
+=== 3h. expand again — same slide back, data intact, scroll position untouched ===
+  PASS  expanding slides the details back down to exactly their previous height   [8 in-between frames, 184 ms, 0 -> 178 px (original 178 px)]
+  PASS  while scrolled mid-pane, expanding the details did NOT reset or shift #tab-body's scroll position   [scrollTop 3628 -> 3628 (pane 7844 px tall in a 588 px viewport)]
+  PASS  expanded: anchors hold and no inline style or animation is left behind   [clean]
+  PASS  after 3 more collapse/expand rounds the header HTML, filename, detail text, capability chips and SHA-256 are byte-identical (nothing blanked, stale or re-rendered)   [innerHTML 1786 B, chips 9, hash 9e0438c87240…]
+  PASS  scrolled to the very bottom: expanding clamps scrollTop to the new (smaller) maximum — inherent to a taller header, not a reset   [scrollTop 7442 -> 7256, reachable max 7442 -> 7256]
+
+=== 3h. collapse, reload, and open another file — preference persists and composes with "hidden" ===
+  PASS  after reload with the details collapsed: the preference is restored AND the block stays hidden because no file is loaded   [html='sf-oh-collapsed sf-anim' header display=none]
+  PASS  the details preference is applied before the first paint (no flash of the expanded block)   [class at 40.1 ms, first paint at 108.0 ms]
+  PASS  loading a file from RECENT re-shows the block respecting the collapsed preference   [header visible, details.h=0, aria=false]
+  PASS  opening a DIFFERENT file: the new file's own data is shown (format json, fresh SHA-256) and the collapsed preference still applies   [name=data.json format=json (application/json)]
+  PASS  expanding it shows the new file's details fully (capability chips populated, anchors intact)   [details.h=178]
+
+=== 3h. keyboard, rapid clicks, reduced motion, and the other two toggles ===
+  PASS  the arrow works from the keyboard (Enter collapses, Space expands)
+  PASS  double click mid-animation ends cleanly expanded (no stuck half-state, no leftover inline style)
+  PASS  prefers-reduced-motion: the details snap shut (0 in-between frames) and land in the right state   [0 in-between frames, 178 -> 0 px]
+  PASS  with the top bar AND the sidebar already collapsed the details still slide correctly (the freed space goes to #tab-body, the strip stays anchored)   [header 225 -> 39, body 502.5 -> 688.5]
+  PASS  restoring everything leaves all three toggles in the state they were asked for (no interference between them)   [header back to 225 px, aria=true]
+  PASS  zero console errors / uncaught page errors during this section   [0 errors]
+
+=== 7. ENCRYPT / DECRYPT tabs (AES-256-GCM) ===
+  server reports device_lock=True (platform: Windows/wine)
+  PASS  #btn-encrypt opens the ENCRYPT tab
+  PASS  ENCRYPT with nothing loaded shows the defensive 'open an object first' message
+  PASS  #btn-decrypt opens the DECRYPT tab with no object loaded
+  PASS  with an object loaded the ENCRYPT tab renders the form (not the defensive message)   [500 chars of pane text, object label: True]
+  PASS  GO starts disabled (no password, no acknowledgement)
+  PASS  mismatched confirmation shows the inline error
+  PASS  GO stays disabled while the two passwords differ
+  PASS  GO still disabled until the acknowledgement checkbox is ticked
+  PASS  the no-recovery warning is shown next to the acknowledgement
+  PASS  GO becomes enabled once passwords match AND the warning is acknowledged
+  PASS  SAVE AS .SFP (unchanged) still writes the .sfp magic   [8b5346500d0a1a0a]
+  PASS  download keeps the object's name with .encrypted.sfp   [secret-notes.encrypted.sfp]
+  PASS  the encrypted download is a real .sfp container (same magic as SAVE AS)   [8b5346500d0a1a0a]
+  PASS  it carries the ENCR chunk (mode/kdf/salt/nonce framing, all non-secret)
+  PASS  THE PLAINTEXT IS GONE: the marker text does not appear in the bytes
+  PASS  the file's decoded text does not appear in the bytes
+  PASS  not even the original filename is readable in the bytes
+  PASS  the tab reports success with the real filename   [Encrypted and saved as secret-notes.encrypted.sfp (2.7 KB)]
+  PASS  wrong password reports the specific failure   [wrong password — AES-256-GCM could not authenticate this file (or the file is damaged)]
+  PASS  wrong password shows NO success block (no false success)
+  PASS  correct password reports the decrypted filename   [decrypted secret-notes-decrypted.sfp]
+  PASS  OPEN THIS FILE lands in the normal VIEW tab with the content intact
+  PASS  the whole decoded text came back, not a stub   [289 chars, 6 body lines (source file had 6)]
+  PASS  device radio is available on this platform
+  PASS  device mode shows its own note instead of password fields
+  PASS  the password inputs are hidden in device mode
+  PASS  the warning + acknowledgement stay visible in device mode
+  PASS  device-locked file holds no readable plaintext either
+  PASS  same machine unlocks its own device-locked file with no password
+      note: wine resolves %LOCALAPPDATA% itself -> /home/user/.cache/sfwine/drive_c/users/user/AppData/Local/Superfile/device-key.json
+  PASS  the device key is kept in this user's app data dir (not in the project dir)   [/home/user/.cache/sfwine/drive_c/users/user/AppData/Local/Superfile/device-key.json]
+  PASS  the stored master key is a DPAPI-protected blob, not plaintext   [292 chars of protected data, device_ref=92477f95-9284-46dc-8e6b-1c20a593bbed]
+  PASS  a DIFFERENT device (keyring absent, as on another computer) gets the exact message
+  PASS  the different-device failure shows no success block
+  PASS  the original device still unlocks the file afterwards
+  PASS  no uncaught JavaScript exception anywhere in the encryption flow   [0 page errors]
+  PASS  no unexpected console errors (the deliberate failures are filtered)   [2 deliberate 400 responses filtered]
+  PASS  exactly the 2 deliberate failure(s) came back as HTTP 400 — no hidden 5xx   [console.error: Failed to load resource: the server responded with a status of 400 (Bad Request); console.error: Failed to load resource: the server responded with a status of 400 (Bad Request)]
+
+========================================================================
+RESULT: 128 passed, 0 failed, 128 checks
+========================================================================
+
+==========================================================================
+SAME SCRIPT, SOURCE TREE - summary
+==========================================================================
+    PASS  the greyed-out radio says why   [['device-lock mode is Windows-only in this build — use a password, or open the file on the Windows build.']]
+  RESULT: 120 passed, 0 failed, 120 checks

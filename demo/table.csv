@@ -1,0 +1,4 @@
+name,type,count,alpha,pixel,text
+formats,protocol,42,0.5,255,ok
+adapters,plugin,13,1.5,128,partial
+objects,universal,7,2.5,64,lossless
